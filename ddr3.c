@@ -275,9 +275,26 @@ void ddr3_test_opt() {
   }
 }
 
+unsigned short swizzle(unsigned char o, unsigned char e) {
+  unsigned short ret = 0;
+
+  ret = ((e & 1) ? 1 : 0) | (((e & 2) ? 1 : 0) << 2) |
+    (((e & 4) ? 1 : 0) << 4) | (((e & 8) ? 1 : 0) << 6) |
+    (((e & 0x10) ? 1 : 0) << 8) | (((e & 0x20) ? 1 : 0) << 10) |
+    (((e & 0x40) ? 1 : 0) << 12) | (((e & 0x80) ? 1 : 0) << 14);
+
+  ret |= (((o & 1) ? 1 : 0) << 1) | (((o & 2) ? 1 : 0) << 3) |
+    (((o & 4) ? 1 : 0) << 5) | (((o & 8) ? 1 : 0) << 7) |
+    (((o & 0x10) ? 1 : 0) << 9) | (((o & 0x20) ? 1 : 0) << 11) |
+    (((o & 0x40) ? 1 : 0) << 13) | (((o & 0x80) ? 1 : 0) << 15);
+
+  return ret;
+  
+}
 
 void dump_ddr3(unsigned int address, unsigned int len, int ofd) {
   unsigned int readback[DDR3_FIFODEPTH];
+  unsigned short *rbkhack;
   int i;
   int burstaddr = 0;
   unsigned int data;
@@ -333,10 +350,16 @@ void dump_ddr3(unsigned int address, unsigned int len, int ofd) {
     for( i = 0; i < DDR3_FIFODEPTH; i += 2 ) {
       if( (i % 8) == 0 )
 	printf( "\n%08x: ", (burstaddr + i) * 4 );
-      //      printf( "%08x ", readback[i] );
-      printf( "%02x%02x%02x%02x%02x%02x%02x%02x ", 
-	      readback[i] & 0xFF, (readback[i] >> 8) & 0xFF, (readback[i] >> 16) & 0xFF, (readback[i] >> 24) & 0xFF,
-	      readback[i+1] & 0xFF, (readback[i+1] >> 8) & 0xFF, (readback[i+1] >> 16) & 0xFF, (readback[i+1] >> 24) & 0xFF );
+      //      printf( "%04x %04x %04x %04x ", 
+      //	      swizzle((readback[i+1] >> 24) & 0xFF, (readback[i+1] >> 16) & 0xFF),
+      //	      swizzle((readback[i+1] >> 8) & 0xFF, readback[i+1] & 0xFF),  
+      //	      swizzle((readback[i] >> 24) & 0xFF, (readback[i] >> 16) & 0xFF), 
+      //	      swizzle((readback[i] >> 8) & 0xFF, readback[i] & 0xFF)  );
+
+      // later versions of FPGA fix bit swizzle and word swap order...
+      rbkhack = (unsigned short *) readback;
+      printf( "%04x %04x %04x %04x ", rbkhack[i], rbkhack[i+1], rbkhack[i+2], rbkhack[i+3] );
+
       if( ofd > 0 ) {
 	write( ofd, &(readback[i]), 8 );
       }

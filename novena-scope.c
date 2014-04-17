@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <time.h>
 #include "gpio.h"
+//#include <linux/i2c.h>
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
 
@@ -109,8 +110,6 @@ void print_usage(char *progname) {
         "\t-adc_reset                   reset the ADC subsystem\n"
         "\t-adc_off                     power down expansion card\n"
         "\t-adc_pll                     configure the ADC PLL\n"
-        "\t-adc_cal                     initiate ADC calibration\n"
-        "\t-adc_calstat                 calibration completion status\n"
         "\t-adc_tp                      set ADC to generate a test pattern\n"
         "\t-adc_default                 set ADC to defaults\n"
         "\t-adc_dev                     dev use only\n"
@@ -680,8 +679,8 @@ int main(int argc, char **argv) {
   }
 
   // we're always going to need this, so make it a default call
-  setup_fpga();
-  setup_fpga_cs1();
+  //  setup_fpga();
+  //  setup_fpga_cs1();
 
   while(argc > 0) {
     if(!strcmp(*argv, "-h")) {
@@ -792,29 +791,21 @@ int main(int argc, char **argv) {
     } else if(!strcmp(*argv, "-adc_pll")) {  // setup ADC PLL
       argc--;
       argv++;
-      self_config_ad9520(ADC_500MHZ);
-      default_adc08d1020();
-    } else if(!strcmp(*argv, "-adc_cal")) {  // calibrate the ADC
-      argc--;
-      argv++;
-      cal_adc08d1020();
-    } else if(!strcmp(*argv, "-adc_calstat")) {  // setup ADC PLL
-      argc--;
-      argv++;
-      adc08d1020_calrun_stat() ? printf( "cal ongoing\n" ) : printf( "cal done\n" );
+      self_config_ad9520(ADC_100MHz);
+      default_ad9265();
     } else if(!strcmp(*argv, "-adc_tp")) {  // put ADC into test pattern mode
       argc--;
       argv++;
-      testpattern_adc08d1020();
+      testpattern_ad9265();
     } else if(!strcmp(*argv, "-adc_default")) {  // set ADC defaults
       argc--;
       argv++;
-      default_adc08d1020();
+      default_ad9265();
     } else if(!strcmp(*argv, "-adc_dev")) {  // dev routine for ADC
       argc--;
       argv++;
       ddr3_burst_read();
-      analysis1();
+      //      analysis1();
     } else if(!strcmp(*argv, "-burstread")) {  // simple burst readback routine
       argc--;
       argv++;

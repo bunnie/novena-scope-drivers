@@ -2,6 +2,7 @@ int self_config_ad9520();
 
 #define ADC_500MHZ  0
 #define ADC_1000MHz 1
+#define ADC_100MHz 2
 
 //SERIAL_PORT_CONFIGURATION
 #define AD9520_SERIAL_PORT_CONFIG 0x000 
