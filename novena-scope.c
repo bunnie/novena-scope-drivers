@@ -691,6 +691,7 @@ int main(int argc, char **argv) {
     else if(!strcmp(*argv, "-v")) {
       argc--;
       argv++;
+      setup_fpga();
       printf( "FPGA version code: %04hx.%04hx\n", 
 	      read_kernel_memory(FPGA_R_DDR3_V_MINOR, 0, 2),
 	      read_kernel_memory(FPGA_R_DDR3_V_MAJOR, 0, 2) );
@@ -804,38 +805,14 @@ int main(int argc, char **argv) {
     } else if(!strcmp(*argv, "-adc_dev")) {  // dev routine for ADC
       argc--;
       argv++;
+      setup_fpga();
+      setup_fpga_cs1();
       ddr3_burst_read();
       //      analysis1();
     } else if(!strcmp(*argv, "-burstread")) {  // simple burst readback routine
       argc--;
       argv++;
       burstread();
-    } else if(!strcmp(*argv, "-afe_offset")) { 
-      argc--;
-      argv++;
-      if( argc != 1 ) {
-	printf( "usage -afe_offset 0x<code>\n" );
-	return 1;
-      }
-      a1 = strtoul(*argv, NULL, 16);
-      argc--;
-      argv++;
-      afe_offset(a1);
-    } else if(!strcmp(*argv, "-afe_set")) {
-      argc--;
-      argv++;
-      if( argc != 2 ) {
-	printf( "usage -afe_set <filt> <atten>\n" );
-	return 1;
-      }
-      a1 = strtoul(*argv, NULL, 10);
-      argc--;
-      argv++;
-      a2 = strtoul(*argv, NULL, 10);
-      argc--;
-      argv++;
-      atten = 0 - (int)a2;
-      afe_setgain(1, a1, 0, atten);
     } else {
       print_usage(prog);
       return 1;
